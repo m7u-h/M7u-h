@@ -7,21 +7,16 @@ import '../models/link_item.dart';
 class LinkService {
   static const String _historyKey = 'link_history';
 
-  // توليد التوكن
   static Future<void> generateToken(String email) async {
     await MediaLink().generateAndSetToken(email, shouldPrint: true);
   }
 
-  // رفع الملف بالواجهة البرمجية الجديدة للمكتبة
   static Future<String?> uploadFile(File file, String fileName) async {
     try {
       final result = await MediaLink().uploadFile(
         file,
         folderName: 'converted_links',
         isSecret: false,
-        onProgress: (progress, sent, total) {
-          print('Upload progress: ${(progress * 100).toInt()}%');
-        },
       );
       
       if (result.success && result.link != null) {
@@ -35,7 +30,6 @@ class LinkService {
     return null;
   }
 
-  // حفظ رابط جديد في السجل
   static Future<void> saveToHistory(LinkItem item) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> existing = prefs.getStringList(_historyKey) ?? [];
@@ -43,19 +37,13 @@ class LinkService {
     await prefs.setStringList(_historyKey, existing);
   }
 
-  // قراءة كل السجل (الأحدث أولاً)
   static Future<List<LinkItem>> getHistory() async {
     final prefs = await SharedPreferences.getInstance();
     final List<String>? raw = prefs.getStringList(_historyKey);
     if (raw == null) return [];
-    return raw
-        .map((e) => LinkItem.fromJson(jsonDecode(e)))
-        .toList()
-        .reversed
-        .toList();
+    return raw.map((e) => LinkItem.fromJson(jsonDecode(e))).toList().reversed.toList();
   }
 
-  // حذف السجل بالكامل
   static Future<void> clearHistory() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_historyKey);
