@@ -21,8 +21,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.47.7'  # <--- رجعنا النسخة الصح
           channel: 'stable'
+          flutter-version: 'latest'
           cache: true
       
       - name: Clean Project
@@ -34,14 +34,23 @@ jobs:
       - name: Generate Android Files
         run: flutter create . --platforms=android
 
-      # تعديل الـ SDK لـ 36 عشان مشكلة المكتبة
-      - name: Force compileSdk to 36
+      # الحل الجذري: فحص الصيغتين وتعديلهما لرفع compileSdk و targetSdk إلى 36
+      - name: Force SDK Versions
         run: |
-          find android/app -name "build.gradle*" -exec sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g' {} +
-          find android/app -name "build.gradle*" -exec sed -i 's/compileSdkVersion = flutter.compileSdkVersion/compileSdkVersion = 36/g' {} +
-          find android/app -name "build.gradle*" -exec sed -i 's/compileSdkVersion 34/compileSdkVersion 36/g' {} +
-          find android/app -name "build.gradle*" -exec sed -i 's/compileSdk = 34/compileSdk = 36/g' {} +
-          echo "تم إجبار نسخة الـ SDK على 36 بنجاح!"
+          echo "Updating Gradle config..."
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g' android/app/build.gradle.kts
+            sed -i 's/compileSdk = 34/compileSdk = 36/g' android/app/build.gradle.kts
+            sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/g' android/app/build.gradle.kts
+            sed -i 's/targetSdk = 34/targetSdk = 36/g' android/app/build.gradle.kts
+          fi
+          if [ -f android/app/build.gradle ]; then
+            sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 36/g' android/app/build.gradle
+            sed -i 's/compileSdkVersion 34/compileSdkVersion 36/g' android/app/build.gradle
+            sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 36/g' android/app/build.gradle
+            sed -i 's/targetSdkVersion 34/targetSdkVersion 36/g' android/app/build.gradle
+          fi
+          echo "Gradle files updated successfully."
 
       - name: Fix App Name
         run: sed -i 's/android:label=".*"/android:label="M7uh2link"/g' android/app/src/main/AndroidManifest.xml
