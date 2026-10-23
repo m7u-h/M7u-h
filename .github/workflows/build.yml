@@ -22,12 +22,12 @@ jobs:
           channel: 'stable'
           cache: true
           
-      - name: Get dependencies
-        run: flutter pub get
-        
-      # هنا الحل السحري: إجبار فلاتر على استخدام الاسم الصحيح
       - name: Generate Android files
         run: flutter create --platforms=android --overwrite --project-name m7uh2link .
+        
+      # هنا السر: ننزل المكتبات بعد ما نولد ملفات الأندرويد عشان ما تنمسح
+      - name: Get dependencies
+        run: flutter pub get
         
       - name: Fix SDK Version
         run: |
