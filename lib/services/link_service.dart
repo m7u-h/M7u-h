@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/link_item.dart';
@@ -8,31 +9,67 @@ class LinkService {
 
   static Future<void> generateToken(String email) async {}
 
-  // تغيير نوع الاستقبال إلى Stream لتفادي انهيار الذاكرة (Out of Memory)
-  static Future<String> uploadFile(Stream<List<int>> stream, int length, String fileName) async {
+  static Future<String> uploadFile(Uint8List fileBytes, String fileName) async {
+    // 1. المحاولة الأولى: catbox.moe
+    String? result = await _uploadToCatbox(fileBytes, fileName);
+    if (result != null) return result;
+
+    // 2. المحاولة الثانية: 0x0.st
+    result = await _uploadTo0x0(fileBytes, fileName);
+    if (result != null) return result;
+
+    // 3. المحاولة الثالثة: tmpfiles.org
+    result = await _uploadToTmpfiles(fileBytes, fileName);
+    if (result != null) return result;
+
+    return 'هەموو سێرڤەرەکان شکستیان هێنا. تکایە پەیوەندی ئینتەرنێتەکەت بپشکنە یان ڤی پی ئێن (VPN) بکوژێنەوە.';
+  }
+
+  static Future<String?> _uploadToCatbox(Uint8List fileBytes, String fileName) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse('https://catbox.moe/user/api.php'));
       request.fields['reqtype'] = 'fileupload';
-      request.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+      request.headers['User-Agent'] = 'Mozilla/5.0';
+      request.files.add(http.MultipartFile.fromBytes('fileToUpload', fileBytes, filename: fileName));
       
-      request.files.add(http.MultipartFile(
-        'fileToUpload',
-        stream,
-        length,
-        filename: fileName,
-      ));
-
-      var response = await request.send().timeout(const Duration(minutes: 10));
+      var response = await request.send().timeout(const Duration(minutes: 3));
       var responseData = await response.stream.bytesToString();
+      
+      if (response.statusCode == 200 && responseData.startsWith('http')) return responseData.trim();
+    } catch (e) { print('Catbox failed: $e'); }
+    return null;
+  }
 
-      if (response.statusCode == 200 && responseData.startsWith('http')) {
-        return responseData.trim(); // الرابط المباشر
-      } else {
-        return 'هەڵەی سێرڤەر: ${response.statusCode} - $responseData';
+  static Future<String?> _uploadTo0x0(Uint8List fileBytes, String fileName) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('https://0x0.st'));
+      request.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
+      
+      var response = await request.send().timeout(const Duration(minutes: 3));
+      var responseData = await response.stream.bytesToString();
+      
+      if (response.statusCode == 200 && responseData.startsWith('http')) return responseData.trim();
+    } catch (e) { print('0x0.st failed: $e'); }
+    return null;
+  }
+
+  static Future<String?> _uploadToTmpfiles(Uint8List fileBytes, String fileName) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('https://tmpfiles.org/api/v1/upload'));
+      request.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
+      
+      var response = await request.send().timeout(const Duration(minutes: 3));
+      var responseData = await response.stream.bytesToString();
+      
+      if (response.statusCode == 200) {
+        var json = jsonDecode(responseData);
+        if (json['data'] != null && json['data']['url'] != null) {
+          String pageUrl = json['data']['url'];
+          return pageUrl.replaceFirst('tmpfiles.org/', 'tmpfiles.org/dl/');
+        }
       }
-    } catch (e) {
-      return 'هەڵە لە پەیوەندی: $e';
-    }
+    } catch (e) { print('Tmpfiles failed: $e'); }
+    return null;
   }
 
   static Future<void> saveToHistory(LinkItem item) async {
