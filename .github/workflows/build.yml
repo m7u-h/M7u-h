@@ -21,7 +21,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.0'
+          flutter-version: '3.47.7'  # <--- رجعنا النسخة الصح
           channel: 'stable'
           cache: true
       
@@ -34,7 +34,7 @@ jobs:
       - name: Generate Android Files
         run: flutter create . --platforms=android
 
-      # البحث الذكي: يبحث عن أي ملف build.gradle أو build.gradle.kts ويجبره يصير 36
+      # تعديل الـ SDK لـ 36 عشان مشكلة المكتبة
       - name: Force compileSdk to 36
         run: |
           find android/app -name "build.gradle*" -exec sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g' {} +
@@ -43,7 +43,6 @@ jobs:
           find android/app -name "build.gradle*" -exec sed -i 's/compileSdk = 34/compileSdk = 36/g' {} +
           echo "تم إجبار نسخة الـ SDK على 36 بنجاح!"
 
-      # تغيير اسم التطبيق أوتوماتيكياً
       - name: Fix App Name
         run: sed -i 's/android:label=".*"/android:label="M7uh2link"/g' android/app/src/main/AndroidManifest.xml
         
