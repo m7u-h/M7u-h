@@ -34,10 +34,10 @@ jobs:
       - name: Generate Android Files
         run: flutter create . --platforms=android
 
-      # البحث عن أي ملف gradle (سواء .gradle أو .gradle.kts) وتعديله
+      # البحث عن أي ملف gradle (سواء .gradle أو .gradle.kts) وتعديله لرفع compileSdk إلى 36
       - name: Fix compileSdk Version Automatically
         run: |
-          echo "Searching for build.gradle files..."
+          echo "Searching for Gradle build files..."
           find android -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -print
           find android -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/compileSdkVersion = flutter.compileSdkVersion/compileSdkVersion = 36/g; s/compileSdkVersion 34/compileSdkVersion 36/g; s/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g; s/compileSdk = 34/compileSdk = 36/g' {} +
 
