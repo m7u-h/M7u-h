@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0B1114), // لون الخلفية
+        scaffoldBackgroundColor: const Color(0xFF0B1114), // لون الخلفية المظلم
         primaryColor: const Color(0xFF00E5FF),
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF00E5FF),
