@@ -10,9 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   file_picker: ^8.1.2
-  media_link_generator: ^1.0.2
   shared_preferences: ^2.3.2
   google_fonts: ^6.2.1
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
