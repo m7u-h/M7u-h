@@ -25,17 +25,23 @@ jobs:
           channel: 'stable'
           cache: true
       
-      - name: Flutter Doctor
-        run: flutter doctor -v
-      
       - name: Clean Project
         run: flutter clean
       
       - name: Install Dependencies
         run: flutter pub get
         
-      - name: Generate Missing Android Files
+      # توليد مجلد الأندرويد الصحيح
+      - name: Generate Android Files
         run: flutter create . --platforms=android
+
+      # تعديل نسخة الـ SDK أوتوماتيكياً لحل خطأ compileSdk
+      - name: Fix compileSdk Version
+        run: sed -i 's/compileSdkVersion = flutter.compileSdkVersion/compileSdkVersion = 36/g' android/app/build.gradle || sed -i 's/compileSdkVersion 34/compileSdkVersion 36/g' android/app/build.gradle
+
+      # تغيير اسم التطبيق أوتوماتيكياً
+      - name: Fix App Name
+        run: sed -i 's/android:label=".*"/android:label="M7uh2link"/g' android/app/src/main/AndroidManifest.xml
         
       - name: Generate App Icon from Code
         run: flutter test lib/generate_icon.dart
@@ -44,7 +50,7 @@ jobs:
         run: dart run flutter_launcher_icons
         
       - name: Build Release APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release
         
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
