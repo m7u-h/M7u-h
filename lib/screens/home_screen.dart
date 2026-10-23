@@ -14,16 +14,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _status = 'فایلێک هەڵبژێرە بۆ دەستپێکردن';
+  String _status = 'ئامادەیە بۆ گۆڕین بۆ لینک';
   String? _downloadLink;
   bool _isUploading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // ⚠️ فعّل هذا السطر مرة واحدة فقط في أول تشغيل، ثم احذفه
-    // LinkService.generateToken('mahmadnajat200956@gmail.com');
-  }
 
   Future<void> _pickAndUpload() async {
     final result = await FilePicker.platform.pickFiles();
@@ -34,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _isUploading = true;
-      _status = 'فایلەکە دەگوازرێتەوە...';
+      _status = 'فایلەکە دەگوازرێتەوە... تکایە چاوەڕێ بکە';
       _downloadLink = null;
     });
 
@@ -79,59 +72,80 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.upload_file, size: 90, color: Colors.grey),
-                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(30),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.cloud_upload, size: 80, color: Colors.blue),
+                ),
+                const SizedBox(height: 30),
                 const Text(
                   'فایلێک هەڵبژێرە',
                   style: TextStyle(
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'ئامادەیە بۆ گۆڕین بۆ لینک',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-                const SizedBox(height: 32),
-                if (_isUploading)
-                  const CircularProgressIndicator()
-                else
-                  ElevatedButton.icon(
-                    onPressed: _pickAndUpload,
-                    icon: const Icon(Icons.link),
-                    label: const Text(
-                      'گۆڕین بۆ لینک',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 40,
-                        vertical: 16,
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 24),
                 Text(
                   _status,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 15),
-                ),
-                if (_downloadLink != null) ...[
-                  const SizedBox(height: 20),
-                  const Text(
-                    'لینکی ڕاستەوخۆ:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 16, 
+                    color: _downloadLink != null ? Colors.green : Colors.grey,
+                    fontWeight: _downloadLink != null ? FontWeight.bold : FontWeight.normal,
                   ),
-                  const SizedBox(height: 8),
-                  SelectableText(
-                    _downloadLink!,
-                    style: const TextStyle(
-                      color: Colors.blue,
-                      fontSize: 14,
+                ),
+                const SizedBox(height: 40),
+                
+                if (_isUploading)
+                  const CircularProgressIndicator()
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton.icon(
+                      onPressed: _pickAndUpload,
+                      icon: const Icon(Icons.link, color: Colors.white),
+                      label: const Text(
+                        'گۆڕین بۆ لینک',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
                     ),
-                    textAlign: TextAlign.center,
+                  ),
+                  
+                if (_downloadLink != null) ...[
+                  const SizedBox(height: 30),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'لینکی ڕاستەوخۆ:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        SelectableText(
+                          _downloadLink!,
+                          style: const TextStyle(color: Colors.blue, fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ],
