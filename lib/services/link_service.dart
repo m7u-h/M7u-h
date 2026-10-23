@@ -7,8 +7,9 @@ import '../models/link_item.dart';
 class LinkService {
   static const String _historyKey = 'link_history';
 
+  // تم إزالة المعامل shouldPrint لحل مشكلة التوافق
   static Future<void> generateToken(String email) async {
-    await MediaLink().generateAndSetToken(email, shouldPrint: true);
+    await MediaLink().generateAndSetToken(email);
   }
 
   static Future<String?> uploadFile(File file, String fileName) async {
@@ -21,8 +22,6 @@ class LinkService {
       
       if (result.success && result.link != null) {
         return result.link;
-      } else {
-        print('Upload error: ${result.message}');
       }
     } catch (e) {
       print('Upload exception: $e');
