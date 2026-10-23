@@ -15,12 +15,16 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.47.7' # <--- حدّثنا النسخة هنا
+          flutter-version: '3.47.7'
           channel: 'stable'
           cache: true
       
       - name: Install Dependencies
         run: flutter pub get
+        
+      # <--- هذا هو السطر السحري الجديد اللي يحل مشكلة مجلد android المفقود
+      - name: Generate Missing Android Files
+        run: flutter create . --platforms=android
         
       - name: Generate App Icon from Code
         run: flutter test lib/generate_icon.dart
