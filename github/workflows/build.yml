@@ -1,0 +1,47 @@
+name: Build M7uh2link APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.6'
+          channel: 'stable'
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Generate Android files
+        run: flutter create . --platforms=android
+        
+      - name: Fix App Name
+        run: sed -i 's/android:label=".*"/android:label="M7uh2link"/g' android/app/src/main/AndroidManifest.xml
+        
+      - name: Generate Icon
+        run: flutter test lib/generate_icon.dart
+        
+      - name: Apply Icons
+        run: dart run flutter_launcher_icons
+        
+      - name: Build APK
+        run: flutter build apk --release
+        
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: M7uh2link-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
