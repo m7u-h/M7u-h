@@ -31,13 +31,15 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
         
-      # توليد مجلد الأندرويد الصحيح
       - name: Generate Android Files
         run: flutter create . --platforms=android
 
-      # تعديل نسخة الـ SDK أوتوماتيكياً لحل خطأ compileSdk
-      - name: Fix compileSdk Version
-        run: sed -i 's/compileSdkVersion = flutter.compileSdkVersion/compileSdkVersion = 36/g' android/app/build.gradle || sed -i 's/compileSdkVersion 34/compileSdkVersion 36/g' android/app/build.gradle
+      # البحث عن أي ملف gradle (سواء .gradle أو .gradle.kts) وتعديله
+      - name: Fix compileSdk Version Automatically
+        run: |
+          echo "Searching for build.gradle files..."
+          find android -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -print
+          find android -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/compileSdkVersion = flutter.compileSdkVersion/compileSdkVersion = 36/g; s/compileSdkVersion 34/compileSdkVersion 36/g; s/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g; s/compileSdk = 34/compileSdk = 36/g' {} +
 
       # تغيير اسم التطبيق أوتوماتيكياً
       - name: Fix App Name
