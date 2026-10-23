@@ -13,31 +13,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _status = 'تەنها فایلەکەت هەڵبژێرە بۆ كردن به لینک';
+  String _status = 'تەنها فایلەکەت هەڵبژێرە بۆ گۆڕین بۆ لینک';
   String? _downloadLink;
   bool _isUploading = false;
 
   Future<void> _pickAndUpload() async {
-    // withReadStream يقرأ الملف على شكل قطع صغيرة حتى لا ينهار التطبيق
-    final result = await FilePicker.platform.pickFiles(withReadStream: true);
+    final result = await FilePicker.platform.pickFiles(withData: true);
     if (result == null) return;
 
     final file = result.files.single;
-    final stream = file.readStream;
-    final length = file.size;
+    final fileBytes = file.bytes;
+    final originalFileName = file.name;
 
-    if (stream == null) {
+    if (fileBytes == null) {
       setState(() => _status = 'هەڵە لە خوێندنەوەی فایلەکە. تکایە فایلێکی تر هەڵبژێرە.');
       return;
     }
 
-    if (length > 200 * 1024 * 1024) {
+    if (fileBytes.length > 200 * 1024 * 1024) {
       setState(() => _status = 'فایلەکە زۆر گەورەیە! سنووری سێرڤەر 200 MBە.');
       return;
     }
 
-    // إضافة حقوقك (m7uh) على اسم الملف قبل الرفع
-    final fileName = 'm7uh_${file.name}';
+    // إضافة حقوقك (m7uh) على اسم الملف
+    final fileName = 'm7uh_$originalFileName';
 
     setState(() {
       _isUploading = true;
@@ -45,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _downloadLink = null;
     });
 
-    final linkResult = await LinkService.uploadFile(stream, length, fileName);
+    final linkResult = await LinkService.uploadFile(fileBytes, fileName);
 
     if (linkResult.startsWith('http')) {
       final item = LinkItem(fileName: fileName, url: linkResult, createdAt: DateTime.now());
