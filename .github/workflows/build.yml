@@ -12,7 +12,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
       
-      # 1. تثبيت Java 17 (مطلوب لبناء التطبيقات)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -26,7 +25,9 @@ jobs:
           channel: 'stable'
           cache: true
       
-      # 2. تنظيف المشروع من أي ملفات بناء قديمة
+      - name: Flutter Doctor
+        run: flutter doctor -v
+      
       - name: Clean Project
         run: flutter clean
       
@@ -43,7 +44,7 @@ jobs:
         run: dart run flutter_launcher_icons
         
       - name: Build Release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --no-tree-shake-icons
         
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
