@@ -7,20 +7,30 @@ import '../models/link_item.dart';
 class LinkService {
   static const String _historyKey = 'link_history';
 
-  // دالة فارغة للتوافق مع الكود القديم (ما راح نحتاجها)
   static Future<void> generateToken(String email) async {}
 
   static Future<String?> uploadFile(File file, String fileName) async {
     try {
+      // 1. قراءة الملف كبيانات (تضمن الاشتغال على كل الأجهزة)
+      List<int> fileBytes = await file.readAsBytes();
+
       var request = http.MultipartRequest('POST', Uri.parse('https://catbox.moe/user/api.php'));
       request.fields['reqtype'] = 'fileupload';
-      request.files.add(await http.MultipartFile.fromPath('fileToUpload', file.path));
+      
+      // 2. إرسال البيانات بدل المسار
+      request.files.add(http.MultipartFile.fromBytes(
+        'fileToUpload',
+        fileBytes,
+        filename: fileName,
+      ));
 
-      var response = await request.send();
+      var response = await request.send().timeout(const Duration(minutes: 2));
       var responseData = await response.stream.bytesToString();
 
       if (response.statusCode == 200 && responseData.startsWith('http')) {
         return responseData.trim(); // الرابط المباشر
+      } else {
+        print('Server Error: $responseData');
       }
     } catch (e) {
       print('Upload exception: $e');
