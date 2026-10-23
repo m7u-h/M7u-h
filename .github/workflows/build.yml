@@ -21,7 +21,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.47.7'
+          flutter-version: '3.32.0'
           channel: 'stable'
           cache: true
       
@@ -34,12 +34,14 @@ jobs:
       - name: Generate Android Files
         run: flutter create . --platforms=android
 
-      # البحث عن أي ملف gradle (سواء .gradle أو .gradle.kts) وتعديله لرفع compileSdk إلى 36
-      - name: Fix compileSdk Version Automatically
+      # البحث الذكي: يبحث عن أي ملف build.gradle أو build.gradle.kts ويجبره يصير 36
+      - name: Force compileSdk to 36
         run: |
-          echo "Searching for Gradle build files..."
-          find android -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -print
-          find android -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i 's/compileSdkVersion = flutter.compileSdkVersion/compileSdkVersion = 36/g; s/compileSdkVersion 34/compileSdkVersion 36/g; s/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g; s/compileSdk = 34/compileSdk = 36/g' {} +
+          find android/app -name "build.gradle*" -exec sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g' {} +
+          find android/app -name "build.gradle*" -exec sed -i 's/compileSdkVersion = flutter.compileSdkVersion/compileSdkVersion = 36/g' {} +
+          find android/app -name "build.gradle*" -exec sed -i 's/compileSdkVersion 34/compileSdkVersion 36/g' {} +
+          find android/app -name "build.gradle*" -exec sed -i 's/compileSdk = 34/compileSdk = 36/g' {} +
+          echo "تم إجبار نسخة الـ SDK على 36 بنجاح!"
 
       # تغيير اسم التطبيق أوتوماتيكياً
       - name: Fix App Name
