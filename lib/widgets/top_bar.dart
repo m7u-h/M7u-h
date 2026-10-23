@@ -7,52 +7,65 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
   const TopBar({super.key, required this.onHistoryTap});
 
   @override
-  Size get preferredSize => const Size.fromHeight(60);
+  Size get preferredSize => const Size.fromHeight(80);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // اسم المستخدم على اليمين (بسبب الـ RTL)
-          const Text(
-            'm7u_h@',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'monospace',
+      flexibleSpace: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 15.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // الجزء الأيمن: زر الحافظة
+            GestureDetector(
+              onTap: onHistoryTap,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF151E23),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.history, color: Colors.white, size: 18),
+                    SizedBox(width: 5),
+                    Text(
+                      'داگرتەکان',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          Row(
-            children: [
-              // أيقونة تلكرام
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.telegram, color: Color(0xFF0088CC), size: 24),
-                onPressed: () {},
+            
+            // الجزء الأيسر: اليوزر والأيقونات
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF151E23),
+                borderRadius: BorderRadius.circular(20),
               ),
-              // أيقونة تيك توك
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.tiktok, color: Colors.black, size: 24),
-                onPressed: () {},
+              child: Row(
+                children: [
+                  const Text(
+                    'm7u_h@',
+                    style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 10),
+                  const Icon(FontAwesomeIcons.snapchat, color: Color(0xFFFFFC00), size: 20),
+                  const SizedBox(width: 8),
+                  const Icon(FontAwesomeIcons.telegram, color: Color(0xFF0088CC), size: 20),
+                  const SizedBox(width: 8),
+                  const Icon(FontAwesomeIcons.tiktok, color: Colors.white, size: 20),
+                ],
               ),
-              // أيقونة سناب شات
-              IconButton(
-                icon: const FaIcon(FontAwesomeIcons.snapchat, color: Color(0xFFFFFC00), size: 24),
-                onPressed: () {},
-              ),
-              // زر الحافظة على اليسار
-              IconButton(
-                icon: const Icon(Icons.history, color: Colors.black, size: 28),
-                onPressed: onHistoryTap,
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
