@@ -10,46 +10,61 @@ class LinkService {
   static Future<void> generateToken(String email) async {}
 
   static Future<String> uploadFile(Uint8List fileBytes, String fileName) async {
-    // 1. المحاولة الأولى: سيرفر file.io
-    String? result = await _uploadToFileIo(fileBytes, fileName);
-    if (result != null && result.startsWith('http')) return result;
+    // قائمة بالسيرفرات الجديدة التي من المرجح أن تعمل
+    // 1. DirectLink API
+    String? result = await _uploadToDirectLink(fileBytes, fileName);
+    if (result != null) return result;
 
-    // 2. المحاولة الثانية: سيرفر gofile.io
-    result = await _uploadToGofile(fileBytes, fileName);
-    if (result != null && result.startsWith('http')) return result;
+    // 2. FileUp API
+    result = await _uploadToFileUp(fileBytes, fileName);
+    if (result != null) return result;
 
-    // 3. المحاولة الثالثة: سيرفر 0x0.st
+    // 3. tfLink API
+    result = await _uploadToTfLink(fileBytes, fileName);
+    if (result != null) return result;
+
+    // 4. FileToUrl
+    result = await _uploadToFileToUrl(fileBytes, fileName);
+    if (result != null) return result;
+
+    // السيرفرات القديمة كخيارات احتياطية
+    // 5. catbox.moe
+    result = await _uploadToCatbox(fileBytes, fileName);
+    if (result != null) return result;
+
+    // 6. 0x0.st
     result = await _uploadTo0x0(fileBytes, fileName);
-    if (result != null && result.startsWith('http')) return result;
+    if (result != null) return result;
 
-    // 4. المحاولة الرابعة: سيرفر tmpfiles.org
+    // 7. tmpfiles.org
     result = await _uploadToTmpfiles(fileBytes, fileName);
-    if (result != null && result.startsWith('http')) return result;
+    if (result != null) return result;
 
-    return 'هەموو سێرڤەرەکان شکستیان هێنا. تکایە پەیوەندی ئینتەرنێتەکەت بپشکنە یان ڤی پی ئێن (VPN) بکوژێنەوە.';
+    return 'هەموو سێرڤەرەکان شکستیان هێنا. تکایە پەیوەندی ئینتەرنێتەکەت بپشکنە یان ڕێکخستنەکانی DNS بگۆڕە.';
   }
 
-  static Future<String?> _uploadToFileIo(Uint8List fileBytes, String fileName) async {
+  // --- دوال الرفع للسيرفرات الجديدة ---
+
+  static Future<String?> _uploadToDirectLink(Uint8List fileBytes, String fileName) async {
     try {
-      var request = http.MultipartRequest('POST', Uri.parse('https://file.io'));
-      request.headers['User-Agent'] = 'Mozilla/5.0';
-      request.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
+      // استخدام النسخة التجريبية من DirectLink
+      var uri = Uri.parse('https://www.dlink666.com/api/upload?name=$fileName');
+      var request = http.Request('PUT', uri);
+      request.bodyBytes = fileBytes;
       
-      var response = await request.send().timeout(const Duration(minutes: 3));
-      var responseData = await response.stream.bytesToString();
+      var streamedResponse = await request.send().timeout(const Duration(minutes: 3));
+      var response = await http.Response.fromStream(streamedResponse);
       
-      if (response.statusCode == 200) {
-        var json = jsonDecode(responseData);
-        if (json['link'] != null) return json['link'];
+      if (response.statusCode == 200 && response.body.startsWith('http')) {
+        return response.body.trim();
       }
-    } catch (e) { print('File.io failed: $e'); }
+    } catch (e) { print('DirectLink failed: $e'); }
     return null;
   }
 
-  static Future<String?> _uploadToGofile(Uint8List fileBytes, String fileName) async {
+  static Future<String?> _uploadToFileUp(Uint8List fileBytes, String fileName) async {
     try {
-      var request = http.MultipartRequest('POST', Uri.parse('https://upload.gofile.io/uploadfile'));
-      request.headers['User-Agent'] = 'Mozilla/5.0';
+      var request = http.MultipartRequest('POST', Uri.parse('https://upload.sinasnp.com/api/public/upload'));
       request.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
       
       var response = await request.send().timeout(const Duration(minutes: 3));
@@ -57,11 +72,58 @@ class LinkService {
       
       if (response.statusCode == 200) {
         var json = jsonDecode(responseData);
-        if (json['data'] != null && json['data']['downloadPage'] != null) {
-          return json['data']['downloadPage'];
-        }
+        if (json['url'] != null) return json['url'];
       }
-    } catch (e) { print('Gofile failed: $e'); }
+    } catch (e) { print('FileUp failed: $e'); }
+    return null;
+  }
+
+  static Future<String?> _uploadToTfLink(Uint8List fileBytes, String fileName) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('https://tflink.net/api/upload'));
+      request.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
+      
+      var response = await request.send().timeout(const Duration(minutes: 3));
+      var responseData = await response.stream.bytesToString();
+      
+      if (response.statusCode == 200) {
+        var json = jsonDecode(responseData);
+        if (json['url'] != null) return json['url'];
+      }
+    } catch (e) { print('tfLink failed: $e'); }
+    return null;
+  }
+
+  static Future<String?> _uploadToFileToUrl(Uint8List fileBytes, String fileName) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('https://filetourl.org/api/upload'));
+      request.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: fileName));
+      
+      var response = await request.send().timeout(const Duration(minutes: 3));
+      var responseData = await response.stream.bytesToString();
+      
+      if (response.statusCode == 200) {
+        var json = jsonDecode(responseData);
+        if (json['url'] != null) return json['url'];
+      }
+    } catch (e) { print('FileToUrl failed: $e'); }
+    return null;
+  }
+
+  // --- دوال الرفع للسيرفرات القديمة (للاحتياط) ---
+
+  static Future<String?> _uploadToCatbox(Uint8List fileBytes, String fileName) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('https://catbox.moe/user/api.php'));
+      request.fields['reqtype'] = 'fileupload';
+      request.headers['User-Agent'] = 'Mozilla/5.0';
+      request.files.add(http.MultipartFile.fromBytes('fileToUpload', fileBytes, filename: fileName));
+      
+      var response = await request.send().timeout(const Duration(minutes: 3));
+      var responseData = await response.stream.bytesToString();
+      
+      if (response.statusCode == 200 && responseData.startsWith('http')) return responseData.trim();
+    } catch (e) { print('Catbox failed: $e'); }
     return null;
   }
 
@@ -99,6 +161,7 @@ class LinkService {
     return null;
   }
 
+  // --- دوال السجل (بدون تغيير) ---
   static Future<void> saveToHistory(LinkItem item) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> existing = prefs.getStringList(_historyKey) ?? [];
