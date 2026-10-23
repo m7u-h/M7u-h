@@ -7,26 +7,30 @@ import '../models/link_item.dart';
 class LinkService {
   static const String _historyKey = 'link_history';
 
-  // توليد التوكن (مرة واحدة فقط لكل مستخدم)
+  // توليد التوكن
   static Future<void> generateToken(String email) async {
     await MediaLink().generateAndSetToken(email, shouldPrint: true);
   }
 
-  // رفع الملف وإرجاع الرابط المباشر
+  // رفع الملف بالواجهة البرمجية الجديدة للمكتبة
   static Future<String?> uploadFile(File file, String fileName) async {
     try {
       final result = await MediaLink().uploadFile(
         file,
         folderName: 'converted_links',
         isSecret: false,
-        fromDeviceName: 'my_phone',
-        shouldPrint: true,
+        onProgress: (progress, sent, total) {
+          print('Upload progress: ${(progress * 100).toInt()}%');
+        },
       );
-      if (result != null) {
+      
+      if (result.success && result.link != null) {
         return result.link;
+      } else {
+        print('Upload error: ${result.message}');
       }
     } catch (e) {
-      print('Upload error: $e');
+      print('Upload exception: $e');
     }
     return null;
   }
