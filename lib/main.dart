@@ -15,20 +15,21 @@ class MyApp extends StatelessWidget {
       title: 'M7uh2link',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: const Color(0xFFF8F9FA),
-        textTheme: GoogleFonts.notoKufiArabicTextTheme(),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0B1114), // لون الخلفية
+        primaryColor: const Color(0xFF00E5FF),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF00E5FF),
+          surface: Color(0xFF151E23), // لون البطاقات
+        ),
+        textTheme: GoogleFonts.notoKufiArabicTextTheme(ThemeData.dark().textTheme),
       ),
-      // إجبار التطبيق يكون من اليمين لليسار (RTL)
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: child!,
         );
       },
-      locale: const Locale('ckb'),
-      supportedLocales: const [Locale('ckb'), Locale('en')],
       home: const HomeScreen(),
     );
   }
