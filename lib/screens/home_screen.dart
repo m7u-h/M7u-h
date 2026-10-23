@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../models/link_item.dart';
@@ -14,16 +13,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _status = 'ئامادەیە بۆ گۆڕین بۆ لینک';
+  String _status = 'تەنها فایلەکەت هەڵبژێرە بۆ كردن به لینک';
   String? _downloadLink;
   bool _isUploading = false;
 
   Future<void> _pickAndUpload() async {
-    final result = await FilePicker.platform.pickFiles();
+    // withReadStream يقرأ الملف على شكل قطع صغيرة حتى لا ينهار التطبيق
+    final result = await FilePicker.platform.pickFiles(withReadStream: true);
     if (result == null) return;
 
-    final file = File(result.files.single.path!);
-    final fileName = result.files.single.name;
+    final file = result.files.single;
+    final stream = file.readStream;
+    final length = file.size;
+
+    if (stream == null) {
+      setState(() => _status = 'هەڵە لە خوێندنەوەی فایلەکە. تکایە فایلێکی تر هەڵبژێرە.');
+      return;
+    }
+
+    if (length > 200 * 1024 * 1024) {
+      setState(() => _status = 'فایلەکە زۆر گەورەیە! سنووری سێرڤەر 200 MBە.');
+      return;
+    }
+
+    // إضافة حقوقك (m7uh) على اسم الملف قبل الرفع
+    final fileName = 'm7uh_${file.name}';
 
     setState(() {
       _isUploading = true;
@@ -31,24 +45,18 @@ class _HomeScreenState extends State<HomeScreen> {
       _downloadLink = null;
     });
 
-    final link = await LinkService.uploadFile(file, fileName);
+    final linkResult = await LinkService.uploadFile(stream, length, fileName);
 
-    if (link != null) {
-      final item = LinkItem(
-        fileName: fileName,
-        url: link,
-        createdAt: DateTime.now(),
-      );
+    if (linkResult.startsWith('http')) {
+      final item = LinkItem(fileName: fileName, url: linkResult, createdAt: DateTime.now());
       await LinkService.saveToHistory(item);
 
       setState(() {
-        _downloadLink = link;
+        _downloadLink = linkResult;
         _status = 'سەرکەوتوو بوو! لینکی ڕاستەوخۆ:';
       });
     } else {
-      setState(() {
-        _status = 'هەڵەیەک ڕوویدا. تکایە دووبارە هەوڵ بدەرەوە.';
-      });
+      setState(() => _status = linkResult); // تظهر رسالة الخطأ الحقيقية
     }
 
     setState(() => _isUploading = false);
@@ -59,10 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: TopBar(
         onHistoryTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-          );
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()));
         },
       ),
       body: Padding(
@@ -72,21 +77,13 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(30),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.cloud_upload, size: 80, color: Colors.blue),
-                ),
-                const SizedBox(height: 30),
                 const Text(
-                  'فایلێک هەڵبژێرە',
+                  'app m7u-h',
                   style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    fontSize: 40,
+                    fontWeight: FontWeight.w300,
+                    color: Color(0xFF00E5FF),
+                    letterSpacing: 2,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -95,30 +92,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16, 
-                    color: _downloadLink != null ? Colors.green : Colors.grey,
-                    fontWeight: _downloadLink != null ? FontWeight.bold : FontWeight.normal,
+                    color: _downloadLink != null ? Color(0xFF00E5FF) : Colors.grey,
                   ),
                 ),
                 const SizedBox(height: 40),
                 
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF151E23),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.upload_file, color: Colors.grey),
+                      SizedBox(width: 10),
+                      Text('هەر فایلێک هەڵبژێرە (ڤیدیۆ، وێنە، دەنگ، ZIP)...', style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
                 if (_isUploading)
-                  const CircularProgressIndicator()
+                  const CircularProgressIndicator(color: Color(0xFF00E5FF))
                 else
                   SizedBox(
                     width: double.infinity,
-                    height: 55,
+                    height: 60,
                     child: ElevatedButton.icon(
                       onPressed: _pickAndUpload,
-                      icon: const Icon(Icons.link, color: Colors.white),
+                      icon: const Icon(Icons.download, color: Colors.black, size: 28),
                       label: const Text(
                         'گۆڕین بۆ لینک',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
+                        backgroundColor: const Color(0xFF00E5FF),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        elevation: 10,
+                        shadowColor: const Color(0xFF00E5FF).withOpacity(0.5),
                       ),
                     ),
                   ),
@@ -128,20 +140,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: const Color(0xFF151E23),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                      border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.3)),
                     ),
                     child: Column(
                       children: [
-                        const Text(
-                          'لینکی ڕاستەوخۆ:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                        const Text('لینکی ڕاستەوخۆ:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                         const SizedBox(height: 8),
                         SelectableText(
                           _downloadLink!,
-                          style: const TextStyle(color: Colors.blue, fontSize: 14),
+                          style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 14),
                           textAlign: TextAlign.center,
                         ),
                       ],
