@@ -1,5 +1,6 @@
 name: m7uh2link
 description: "M7uh2link - ئەپی گۆڕینی فایل بۆ لینکی ڕاستەوخۆ"
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
@@ -11,6 +12,7 @@ dependencies:
   file_picker: ^8.0.0
   media_link_generator: ^0.0.2
   shared_preferences: ^2.2.2
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -19,10 +21,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  fonts:
-    - family: NotoKufiArabic
-      fonts:
-        - asset: assets/fonts/NotoKufiArabic-Regular.ttf
   assets:
     - assets/icon/app_icon.png
 
@@ -31,6 +29,3 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/app_icon.png"
   min_sdk_android: 21
-  # إضافة اسم التطبيق على الأيقونة (اختياري)
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/icon/app_icon.png"
