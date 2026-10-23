@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_screen.dart';
 
 void main() {
@@ -11,12 +12,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'M7uh2link', // ← الاسم الجديد
+      title: 'M7uh2link',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        fontFamily: 'NotoKufiArabic',
         scaffoldBackgroundColor: Colors.white,
+        textTheme: GoogleFonts.notoKufiArabicTextTheme(),
       ),
       locale: const Locale('ckb'),
       supportedLocales: const [Locale('ckb'), Locale('en')],
