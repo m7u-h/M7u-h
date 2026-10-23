@@ -1,4 +1,4 @@
-name: Build M7uh2link APK
+name: Build M7uh2link
 
 on:
   push:
@@ -18,16 +18,27 @@ jobs:
           
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.24.5'
           channel: 'stable'
           cache: true
           
       - name: Get dependencies
         run: flutter pub get
         
-      - name: Generate Android files
-        run: flutter create . --platforms=android
+      - name: Generate Android files (Overwrite old ones)
+        run: flutter create --platforms=android --overwrite .
         
+      - name: Fix SDK Version
+        run: |
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g' android/app/build.gradle.kts
+            sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/g' android/app/build.gradle.kts
+          fi
+          if [ -f android/app/build.gradle ]; then
+            sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 36/g' android/app/build.gradle
+            sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 36/g' android/app/build.gradle
+          fi
+          
       - name: Fix App Name
         run: sed -i 's/android:label=".*"/android:label="M7uh2link"/g' android/app/src/main/AndroidManifest.xml
         
