@@ -25,8 +25,9 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         
-      - name: Generate Android files (Overwrite)
-        run: flutter create --platforms=android --overwrite .
+      # هنا الحل السحري: إجبار فلاتر على استخدام الاسم الصحيح
+      - name: Generate Android files
+        run: flutter create --platforms=android --overwrite --project-name m7uh2link .
         
       - name: Fix SDK Version
         run: |
