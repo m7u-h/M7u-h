@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     // ⚠️ فعّل هذا السطر مرة واحدة فقط في أول تشغيل، ثم احذفه
-    // LinkService.generateToken('your_email@gmail.com');
+    // LinkService.generateToken('mahmadnajat200956@gmail.com');
   }
 
   Future<void> _pickAndUpload() async {
