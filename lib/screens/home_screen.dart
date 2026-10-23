@@ -35,7 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // إضافة حقوقك (m7uh) على اسم الملف
     final fileName = 'm7uh_$originalFileName';
 
     setState(() {
@@ -55,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _status = 'سەرکەوتوو بوو! لینکی ڕاستەوخۆ:';
       });
     } else {
-      setState(() => _status = linkResult); // تظهر رسالة الخطأ الحقيقية
+      setState(() => _status = linkResult);
     }
 
     setState(() => _isUploading = false);
@@ -76,32 +75,13 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'app m7u-h',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w300,
-                    color: Color(0xFF00E5FF),
-                    letterSpacing: 2,
-                  ),
-                ),
+                const Text('app m7u-h', style: TextStyle(fontSize: 40, fontWeight: FontWeight.w300, color: Color(0xFF00E5FF), letterSpacing: 2)),
                 const SizedBox(height: 10),
-                Text(
-                  _status,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16, 
-                    color: _downloadLink != null ? Color(0xFF00E5FF) : Colors.grey,
-                  ),
-                ),
+                Text(_status, textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: _downloadLink != null ? Color(0xFF00E5FF) : Colors.grey)),
                 const SizedBox(height: 40),
-                
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF151E23),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xFF151E23), borderRadius: BorderRadius.circular(15)),
                   child: Row(
                     children: const [
                       Icon(Icons.upload_file, color: Colors.grey),
@@ -111,7 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
                 if (_isUploading)
                   const CircularProgressIndicator(color: Color(0xFF00E5FF))
                 else
@@ -121,10 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _pickAndUpload,
                       icon: const Icon(Icons.download, color: Colors.black, size: 28),
-                      label: const Text(
-                        'گۆڕین بۆ لینک',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-                      ),
+                      label: const Text('گۆڕین بۆ لینک', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00E5FF),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -133,7 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  
                 if (_downloadLink != null) ...[
                   const SizedBox(height: 30),
                   Container(
@@ -147,11 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         const Text('لینکی ڕاستەوخۆ:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                         const SizedBox(height: 8),
-                        SelectableText(
-                          _downloadLink!,
-                          style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 14),
-                          textAlign: TextAlign.center,
-                        ),
+                        SelectableText(_downloadLink!, style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 14), textAlign: TextAlign.center),
                       ],
                     ),
                   ),
