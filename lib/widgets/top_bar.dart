@@ -20,7 +20,6 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // الجزء الأيمن: زر الحافظة
             GestureDetector(
               onTap: onHistoryTap,
               child: Container(
@@ -33,16 +32,12 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                   children: const [
                     Icon(Icons.history, color: Colors.white, size: 18),
                     SizedBox(width: 5),
-                    Text(
-                      'داگرتەکان',
-                      style: TextStyle(color: Colors.white, fontSize: 14),
-                    ),
+                    Text('داگرتەکان', style: TextStyle(color: Colors.white, fontSize: 14)),
                   ],
                 ),
               ),
             ),
             
-            // الجزء الأيسر: اليوزر والأيقونات
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
